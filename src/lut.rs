@@ -20,6 +20,7 @@ const COS_LUT_SIZE: usize = 1 << COS_LUT_BITS;
 const COS_FRAC_BITS: u32 = 32 - COS_LUT_BITS;
 const COS_FRAC_MASK: u32 = (1 << COS_FRAC_BITS) - 1;
 
+#[allow(clippy::excessive_precision, clippy::unreadable_literal)]
 #[rustfmt::skip]
 const COS_LUT_Y: [f32; COS_LUT_SIZE] = [
     1.000000e+00,9.987955e-01,9.951847e-01,9.891765e-01,9.807853e-01,9.700313e-01,9.569403e-01,9.415441e-01,
@@ -40,6 +41,7 @@ const COS_LUT_Y: [f32; COS_LUT_SIZE] = [
     9.238795e-01,9.415441e-01,9.569403e-01,9.700313e-01,9.807853e-01,9.891765e-01,9.951847e-01,9.987955e-01,
 ];
 
+#[allow(clippy::excessive_precision, clippy::unreadable_literal)]
 #[rustfmt::skip]
 const COS_LUT_DY: [f32; COS_LUT_SIZE] = [
     -3.589820e-11,-1.076081e-10,-1.790588e-10,-2.500781e-10,-3.204950e-10,-3.901397e-10,-4.588446e-10,-5.264441e-10,
@@ -64,23 +66,23 @@ const COS_LUT_DY: [f32; COS_LUT_SIZE] = [
 pub fn cos_lookup(x: u32) -> f32 {
     let idx = (x >> COS_FRAC_BITS) as usize;
     let frac = (x & COS_FRAC_MASK) as f32;
-    return COS_LUT_Y[idx] + frac * COS_LUT_DY[idx];
+    COS_LUT_Y[idx] + frac * COS_LUT_DY[idx]
 }
 
 /// Returns the cosine of x (radians).
 pub fn cos(x: f32) -> f32 {
     let xi = (abs(x) * PHASE_SCALE) as u32;
-    return cos_lookup(xi);
+    cos_lookup(xi)
 }
 
 /// Returns the sine of x (radians).
 pub fn sin(x: f32) -> f32 {
-    return cos((PI / 2.0) - x);
+    cos((PI / 2.0) - x)
 }
 
 /// Returns the tangent of x (radians).
 pub fn tan(x: f32) -> f32 {
-    return sin(x) / cos(x);
+    sin(x) / cos(x)
 }
 
 //-----------------------------------------------------------------------------
@@ -91,6 +93,7 @@ const POW_LUT_SIZE: usize = 1 << POW_LUT_BITS;
 const POW_LUT_MASK: usize = (1 << POW_LUT_BITS) - 1;
 const POW_LUT_SCALE: f32 = (1 << (POW_LUT_BITS * 2)) as f32;
 
+#[allow(clippy::excessive_precision, clippy::unreadable_literal)]
 #[rustfmt::skip]
 const POW_LUT_0: [f32; POW_LUT_SIZE] = [
     1.000000e+00,1.005430e+00,1.010889e+00,1.016378e+00,1.021897e+00,1.027446e+00,1.033025e+00,1.038634e+00,
@@ -111,6 +114,7 @@ const POW_LUT_0: [f32; POW_LUT_SIZE] = [
     1.915207e+00,1.925606e+00,1.936062e+00,1.946574e+00,1.957144e+00,1.967771e+00,1.978456e+00,1.989199e+00,
 ];
 
+#[allow(clippy::excessive_precision, clippy::unreadable_literal)]
 #[rustfmt::skip]
 const POW_LUT_1: [f32; POW_LUT_SIZE] = [
     0.000000e+00,4.230724e-05,8.461627e-05,1.269271e-04,1.692397e-04,2.115541e-04,2.538703e-04,2.961883e-04,
@@ -133,7 +137,7 @@ const POW_LUT_1: [f32; POW_LUT_SIZE] = [
 
 /// Returns 2 to the x where x is an integer [-126,127]
 fn pow2_int(x: i32) -> f32 {
-    return f32::from_bits(((127 + x) << 23) as u32);
+    f32::from_bits(((127 + x) << 23) as u32)
 }
 
 /// Returns 2 to the x where x is a fraction [0,1)
@@ -141,7 +145,7 @@ fn pow2_frac(x: f32) -> f32 {
     let n = (x * POW_LUT_SCALE) as usize;
     let x0 = POW_LUT_0[(n >> POW_LUT_BITS) & POW_LUT_MASK];
     let x1 = POW_LUT_1[n & POW_LUT_MASK];
-    return x0 * (x1 + 1.0);
+    x0 * (x1 + 1.0)
 }
 
 /// Returns 2 to the x.
@@ -155,14 +159,14 @@ pub fn pow2(x: f32) -> f32 {
         xi -= 1;
         xf += 1.0;
     }
-    return pow2_int(xi) * pow2_frac(xf);
+    pow2_int(xi) * pow2_frac(xf)
 }
 
-const LOG_E2: f32 = 1.4426950408889634; // 1.0 / math.log(2)
+const LOG2_E: f32 = std::f32::consts::LOG2_E; // 1.0 / math.log(2)
 
 /// Returns e to the x.
 pub fn pow_e(x: f32) -> f32 {
-    return pow2(LOG_E2 * x);
+    pow2(LOG2_E * x)
 }
 
 //-----------------------------------------------------------------------------
