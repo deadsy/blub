@@ -1,8 +1,14 @@
 
-.PHONY: all fmt test doc lint clean
+.PHONY: all bench fmt test doc lint clean
 
 all:
 	cargo run --example test
+
+release:
+	cargo run --release --example test
+
+bench:
+	cargo bench
 
 fmt:
 	cargo fmt
